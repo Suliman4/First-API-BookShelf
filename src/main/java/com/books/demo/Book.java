@@ -1,6 +1,6 @@
 package com.books.demo;
 
-public class BookShelf {
+public class Book {
     private static int bookNum= 0;
     private int id;
     private String title;
@@ -8,7 +8,7 @@ public class BookShelf {
     private String isbn;
     private String publishedYear;
 
-    public BookShelf(String title, String author, String isbn, String publishedYear) {
+    public Book(String title, String author, String isbn, String publishedYear) {
         bookNum++;
         this.id = bookNum;
         this.title = title;

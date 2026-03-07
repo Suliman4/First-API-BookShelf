@@ -1,6 +1,7 @@
 package com.books.demo;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,48 +9,39 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping(path = "/api/v1")
 public class BookController {
-    private final List<BookShelf> books = new ArrayList<>();
+    @Autowired
+    private BookService bookService;
+
     @GetMapping(path = ("/books"))
-    public List<BookShelf> list(){
-        return books;
+    public List<Book> list() {
+        return bookService.list();
     }
+
     @DeleteMapping(path = "/books/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable int id){
-        boolean flag = books.removeIf(bookShelf -> bookShelf.getId() == id);
-        if (flag){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        return bookService.deleteBook(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @PostMapping(path = "/books")
-    public BookShelf add(@RequestBody BookShelf newBook){
-        books.add(newBook);
-        return newBook;
+    public Book add(@RequestBody Book newBook){
+       return bookService.add(newBook);
     }
+
     @GetMapping(path = "/books/{id}")
-    public BookShelf find(@PathVariable int id) {
-        for (BookShelf b : books) {
-            if (id == b.getId())
-                return b;
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The book NOT found");
+    public ResponseEntity<Book> find(@PathVariable int id) {
+        Book book = bookService.find(id);
+        return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
+
     }
+
     @PutMapping(path = "/books/{id}")
-    public BookShelf update(@PathVariable int id, @RequestBody BookShelf updatedBook){
-        for (BookShelf b : books){
-            if (id == b.getId()){
-                b.setTitle(updatedBook.getTitle());
-                b.setAuthor(updatedBook.getAuthor());
-                b.setIsbn(updatedBook.getIsbn());
-                b.setPublishedYear(updatedBook.getPublishedYear());
-                return b;
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The book is NOT FOUND");
+    public ResponseEntity<Book> update(@PathVariable int id, @RequestBody Book updatedBook){
+        Book book = bookService.update(id, updatedBook);
+        return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
     }
 }
